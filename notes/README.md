@@ -7,6 +7,7 @@ Here is your wiki where you can document all stages of the project and save inte
 - Look for datasets
 - Connect to past readings and tasks shown during tutorials
 - Consult Simon on idea and possible improvements in the task  
+
 **Week 52**  
 - Write and submit project proposal
 
