@@ -7,6 +7,9 @@ import pandas as pd
 """
 Create CSV file for text data from JSON file provided by VizWiz.
 - format can be found on VizWiz website (https://vizwiz.org/tasks-and-datasets/image-captioning/)
+
+for GitHub: 
+    saved in /aics-project/data/vizwiz_dataframe.csv
 """
 print('Writing CSV file...')
 
