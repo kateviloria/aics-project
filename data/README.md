@@ -19,8 +19,7 @@ Use this folder for datasets that you may have created and the generated tables 
         [{ "sentids": [0, 1, 2, 3, 4], 
             "imgid": 0, 
             "sentences":
-                        [{ "tokens": 
-                                    ["a", "black", "dog", "is",    "running", "after", "a", "white", "dog", "in", "the", "snow"], 
+                        [{ "tokens": ["a", "black", "dog", "is",    "running", "after", "a", "white", "dog", "in", "the", "snow"], 
                             "raw": "A black dog is running after a white dog in the snow .", 
                             "imgid": 0, 
                             "sentid": 0 }]
