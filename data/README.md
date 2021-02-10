@@ -26,6 +26,6 @@ Use this folder for datasets that you may have created and the generated tables 
                             "sentid": 0 
                         }]
             "split": "train", 
-            "filename": "2513260012_03d33305cf.jpg"
+            "filename": "2513260012_03d33305cf.jpg"}],
   filename : 'vizwiz'}
 ```
