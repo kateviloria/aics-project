@@ -23,9 +23,8 @@ Use this folder for datasets that you may have created and the generated tables 
                                     ["a", "black", "dog", "is",    "running", "after", "a", "white", "dog", "in", "the", "snow"], 
                             "raw": "A black dog is running after a white dog in the snow .", 
                             "imgid": 0, 
-                            "sentid": 0 
-                        }]
+                            "sentid": 0 }]
             "split": "train", 
             "filename": "2513260012_03d33305cf.jpg"}],
-  filename : 'vizwiz'}
+  dataset : 'vizwiz'}
 ```
