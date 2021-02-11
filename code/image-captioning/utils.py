@@ -28,7 +28,8 @@ def create_input_files(dataset,
     :param max_len: don't sample captions longer than this length
     """
 
-    assert dataset in {'coco', 'flickr8k', 'flickr30k'}
+    #assert dataset in {'coco', 'flickr8k', 'flickr30k'}
+    assert dataset in {'vizwiz'}
 
     # Read Karpathy JSON
     with open(karpathy_json_path, 'r') as j:
@@ -58,11 +59,11 @@ def create_input_files(dataset,
         if len(captions) == 0:
             continue
 
-        path = os.path.join(image_folder, img['filepath'], img['filename']) if dataset == 'coco' else os.path.join(
+        path = os.path.join(image_folder, img['filepath'], img['filename']) if dataset == 'vizwiz' else os.path.join(
             image_folder, img['filename'])
 
         # create the splits
-        if img['split'] in {'train', 'restval'}:
+        if img['split'] in {'train'}: 
             train_image_paths.append(path)
             train_image_captions.append(captions)
         elif img['split'] in {'val'}:

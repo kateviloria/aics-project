@@ -76,6 +76,8 @@ def caption_image_beam_search(encoder, decoder, image_path, word_map, beam_size=
     step = 1
     h, c = decoder.init_hidden_state(encoder_out)
 
+    # BEAM SEARCH!
+
     # s is a number less than or equal to k, because sequences are removed from this process once they hit <end>
     while True:
 
