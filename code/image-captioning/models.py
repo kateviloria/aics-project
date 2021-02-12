@@ -96,6 +96,8 @@ class Attention(nn.Module):
         # choose a variant of attention mechanism here:
         # https://lilianweng.github.io/lil-log/2018/06/24/attention-attention.html
         att = self.full_att(self.relu(att1 + att2.unsqueeze(1))).squeeze(2)  # (batch_size, num_pixels)
+
+        # visual sentinel here ish
         
         # probabilities of looking at regions
         alpha = self.softmax(att)  # (batch_size, num_pixels)
@@ -133,6 +135,7 @@ class DecoderWithAttention(nn.Module):
 
         self.embedding = nn.Embedding(vocab_size, embed_dim)  # embedding layer
         self.dropout = nn.Dropout(p=self.dropout)
+        # cell needs to be attended VS just LSTM
         self.decode_step = nn.LSTMCell(embed_dim + encoder_dim, decoder_dim, bias=True)  # decoding LSTMCell
         self.init_h = nn.Linear(encoder_dim, decoder_dim)  # linear layer to find initial hidden state of LSTMCell
         self.init_c = nn.Linear(encoder_dim, decoder_dim)  # linear layer to find initial cell state of LSTMCell
@@ -211,6 +214,8 @@ class DecoderWithAttention(nn.Module):
         predictions = torch.zeros(batch_size, max(decode_lengths), vocab_size).to(device)
         alphas = torch.zeros(batch_size, max(decode_lengths), num_pixels).to(device)
 
+        # IMPORTANT for every word, give attention
+
         # At each time-step, decode by
         # attention-weighing the encoder's output based on the decoder's previous hidden state output
         # then generate a new word in the decoder with the previous word and the attention weighted encoding
@@ -228,5 +233,6 @@ class DecoderWithAttention(nn.Module):
             preds = self.fc(self.dropout(h))  # (batch_size_t, vocab_size)
             predictions[:batch_size_t, t, :] = preds
             alphas[:batch_size_t, t, :] = alpha
+
 
         return predictions, encoded_captions, decode_lengths, alphas, sort_ind

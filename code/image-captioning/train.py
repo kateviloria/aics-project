@@ -11,8 +11,8 @@ from utils import *
 from nltk.translate.bleu_score import corpus_bleu
 
 # Data parameters
-data_folder = '/scratch/nikolai/out_data'  # folder with data files saved by create_input_files.py
-data_name = 'flickr8k_5_cap_per_img_5_min_word_freq'  # base name shared by data files
+data_folder = '/home/gusviloca@GU.GU.SE/aics-vizwiz/out_data'  # folder with data files saved by create_input_files.py
+data_name = 'vizwiz_5_cap_per_img_5_min_word_freq'  # base name shared by data files
 
 # Model parameters
 emb_dim = 512  # dimension of word embeddings
@@ -177,6 +177,9 @@ def train(train_loader, encoder, decoder, criterion, encoder_optimizer, decoder_
         # Remove timesteps that we didn't decode at, or are pads
         # pack_padded_sequence is an easy trick to do this
         # useful tutorial: https://gist.github.com/HarshTrivedi/f4e7293e941b17d19058f6fb90ab0fec
+
+        # saves computations that would have been added by padding and would have just been 0's 
+        # tuple of tensors: (flattened sequences, corresponding batch sizes)
         scores, *_ = pack_padded_sequence(scores, decode_lengths, batch_first=True)
         targets, *_ = pack_padded_sequence(targets, decode_lengths, batch_first=True)
 

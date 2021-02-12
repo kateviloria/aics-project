@@ -19,7 +19,7 @@ def create_input_files(dataset,
     """
     Creates input files for training, validation, and test data.
 
-    :param dataset: name of dataset, one of 'coco', 'flickr8k', 'flickr30k'
+    :param dataset: name of dataset, one of 'coco', 'flickr8k', 'flickr30k', 'vizwiz'
     :param karpathy_json_path: path of Karpathy JSON file with splits and captions
     :param image_folder: folder with downloaded images
     :param captions_per_image: number of captions to sample per image
