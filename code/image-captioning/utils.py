@@ -4,6 +4,8 @@ import h5py
 import json
 import torch
 from scipy.misc import imread, imresize
+#from scipy.misc import imresize
+#from matplotlib.pyplot import imread
 from tqdm import tqdm
 from collections import Counter
 from random import seed, choice, sample
@@ -40,6 +42,7 @@ def create_input_files(dataset,
         
 
     # Read image paths and captions for each image
+    print('Reading image paths and captions for each image...')
     train_image_paths = []
     train_image_captions = []
     val_image_paths = []
@@ -48,6 +51,8 @@ def create_input_files(dataset,
     test_image_captions = []
     word_freq = Counter()
 
+    print("Creating splits...")
+    
     for img in data['images']:
         captions = []
         for c in img['sentences']:
@@ -59,8 +64,9 @@ def create_input_files(dataset,
         if len(captions) == 0:
             continue
 
-        path = os.path.join(image_folder, img['filepath'], img['filename']) if dataset == 'vizwiz' else os.path.join(
-            image_folder, img['filename'])
+        path = os.path.join(image_folder, img['filename']) 
+        #path = os.path.join(image_folder, img['filepath'], img['filename']) if dataset == 'vizwiz' else os.path.join(
+        #    image_folder, img['filename'])
 
         # create the splits
         if img['split'] in {'train'}: 
@@ -83,6 +89,7 @@ def create_input_files(dataset,
     
 
     # Create word map
+    print('Creating word map...')
     words = [w for w in word_freq.keys() if word_freq[w] > min_word_freq]
     word_map = {k: v + 1 for v, k in enumerate(words)}
     word_map['<unk>'] = len(word_map) + 1
@@ -97,6 +104,7 @@ def create_input_files(dataset,
     base_filename = dataset + '_' + str(captions_per_image) + '_cap_per_img_' + str(min_word_freq) + '_min_word_freq'
 
     # Save word map to a JSON
+    print('Saving word map...')
     with open(os.path.join(output_folder, 'WORDMAP_' + base_filename + '.json'), 'w') as j:
         json.dump(word_map, j)
 
