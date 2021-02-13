@@ -86,15 +86,16 @@ def caption_image_beam_search(encoder, decoder, image_path, word_map, beam_size=
 
     # s is a number less than or equal to k, because sequences are removed from this process once they hit <end>
     while True:
-
-        embeddings = decoder.embedding(k_prev_words).squeeze(1)  # (s, embed_dim)
+        print('kprev', type(k_prev_words))
+        embeddings = decoder.embedding(k_prev_words).squeeze(1) # (s, embed_dim)
+        print('embeddings', type(embeddings))
 
         awe, alpha = decoder.attention(encoder_out, h)  # (s, encoder_dim), (s, num_pixels)
 
-        alpha = alpha.view(-1, enc_image_size, enc_image_size)  # (s, enc_image_size, enc_image_size)
+        alpha = alpha.view(-1, enc_image_size, enc_image_size) # (s, enc_image_size, enc_image_size)
 
         gate = decoder.sigmoid(decoder.f_beta(h))  # gating scalar, (s, encoder_dim)
-        awe = gate * awe
+        awe = (gate * awe)
 
         h, c = decoder.decode_step(torch.cat([embeddings, awe], dim=1), (h, c))  # (s, decoder_dim)
 
@@ -114,18 +115,15 @@ def caption_image_beam_search(encoder, decoder, image_path, word_map, beam_size=
         # Convert unrolled indices to actual indices of scores
         prev_word_inds = top_k_words / vocab_size  # (s)
         prev_word_inds = prev_word_inds.type(torch.LongTensor)
-        print('prevword inds', prev_word_inds.dtype)
-        print(prev_word_inds)
+
         next_word_inds = top_k_words % vocab_size  # (s)
         next_word_inds = next_word_inds.type(torch.LongTensor)
-        print('next word inds', next_word_inds.dtype)
-        print(next_word_inds)
+
         print('HELLOOOOOOOOO')
 
         # Add new words to sequences, alphas
         seqs = torch.cat([seqs[prev_word_inds].cpu(), next_word_inds.unsqueeze(1)], dim=1)  # (s, step+1)
-        print(seqs)
-        print('type', type(seqs))
+
         # change to dtype=long tensor
         seqs = seqs.type(torch.LongTensor)
         seqs_alpha = torch.cat([seqs_alpha[prev_word_inds], alpha[prev_word_inds].unsqueeze(1)],
@@ -153,6 +151,7 @@ def caption_image_beam_search(encoder, decoder, image_path, word_map, beam_size=
         encoder_out = encoder_out[prev_word_inds[incomplete_inds]]
         top_k_scores = top_k_scores[incomplete_inds].unsqueeze(1)
         k_prev_words = next_word_inds[incomplete_inds].unsqueeze(1)
+        print('after', type(k_prev_words))
 
         # Break if things have been going on too long
         if step > 50:
