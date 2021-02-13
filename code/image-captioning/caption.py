@@ -7,10 +7,16 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import skimage.transform
 import argparse
-from scipy.misc import imread, imresize
 from PIL import Image
+#from scipy.misc import imread, imresize
+import imageio
+from skimage.transform import resize
+#from matplotlib.pyplot import imread
+#from skimage.transform import resize
+#from PIL import Image
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 
 
 def caption_image_beam_search(encoder, decoder, image_path, word_map, beam_size=3):
@@ -29,11 +35,11 @@ def caption_image_beam_search(encoder, decoder, image_path, word_map, beam_size=
     vocab_size = len(word_map)
 
     # Read image and process
-    img = imread(image_path)
+    img = imageio.imread(image_path)
     if len(img.shape) == 2:
         img = img[:, :, np.newaxis]
         img = np.concatenate([img, img, img], axis=2)
-    img = imresize(img, (256, 256))
+    img = resize(img, (256, 256))
     img = img.transpose(2, 0, 1)
     img = img / 255.
     img = torch.FloatTensor(img).to(device)
@@ -107,10 +113,21 @@ def caption_image_beam_search(encoder, decoder, image_path, word_map, beam_size=
 
         # Convert unrolled indices to actual indices of scores
         prev_word_inds = top_k_words / vocab_size  # (s)
+        prev_word_inds = prev_word_inds.type(torch.LongTensor)
+        print('prevword inds', prev_word_inds.dtype)
+        print(prev_word_inds)
         next_word_inds = top_k_words % vocab_size  # (s)
+        next_word_inds = next_word_inds.type(torch.LongTensor)
+        print('next word inds', next_word_inds.dtype)
+        print(next_word_inds)
+        print('HELLOOOOOOOOO')
 
         # Add new words to sequences, alphas
-        seqs = torch.cat([seqs[prev_word_inds], next_word_inds.unsqueeze(1)], dim=1)  # (s, step+1)
+        seqs = torch.cat([seqs[prev_word_inds].cpu(), next_word_inds.unsqueeze(1)], dim=1)  # (s, step+1)
+        print(seqs)
+        print('type', type(seqs))
+        # change to dtype=long tensor
+        seqs = seqs.type(torch.LongTensor)
         seqs_alpha = torch.cat([seqs_alpha[prev_word_inds], alpha[prev_word_inds].unsqueeze(1)],
                                dim=1)  # (s, step+1, enc_image_size, enc_image_size)
 
@@ -162,7 +179,8 @@ def visualize_att(image_path, seq, alphas, rev_word_map, smooth=True):
     :param smooth: smooth weights?
     """
     image = Image.open(image_path)
-    image = image.resize([14 * 24, 14 * 24], Image.LANCZOS)
+    #image = image.resize([14 * 24, 14 * 24], Image.LANCZOS)
+    image = resize([14 * 24, 14 * 24], Image.LANCZOS)
 
     words = [rev_word_map[ind] for ind in seq]
 
