@@ -99,8 +99,8 @@ def caption_image_beam_search(encoder, decoder, image_path, word_map, beam_size=
 
         h, c = decoder.decode_step(torch.cat([embeddings, awe], dim=1), (h, c))  # (s, decoder_dim)
 
-        scores = decoder.fc(h)  # (s, vocab_size)
-        scores = F.log_softmax(scores, dim=1)
+        scores = decoder.fc(h)  # (s, vocab_size) # fully connected layer maps to vocab size (logits)
+        scores = F.log_softmax(scores, dim=1) # probabilities
 
         # Add
         scores = top_k_scores.expand_as(scores) + scores  # (s, vocab_size)

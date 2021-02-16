@@ -13,7 +13,10 @@ from PIL import Image
 import imageio
 from skimage.transform import resize
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
+#device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+print('device', device)
 
 max_len = 50
 
@@ -48,21 +51,76 @@ def get_greedy_caption(encoder, decoder, image_path, word_map):
     encoder_out = encoder_out.view(1, -1, encoder_dim)  # (1, num_pixels, encoder_dim)
     num_pixels = encoder_out.size(1)
 
-    # Start decoding
+    # Start decoding 
     h, c = decoder.init_hidden_state(encoder_out)
+    # hidden state of image?
     # hidden state is important
     # initialise 
+    # this should be in the loop no?
 
-    print('h')
-    print(h)
-    print('c')
-    print(c)
-
-    #for previous_word_idx in range(max_len):
-        # unless pred word is <end>
+    #print('h')
+    #print(h)
+    #print('c')
+    #print(c)
 
     # Tensor to store predicted word at each step; now they're just <start>
-    # seqs = torch.LongTensor([[word_map['<start>']]] * k).to(device)  # (k, 1)
+    # start = torch.LongTensor([[word_map['<start>' * k ]]]).to(device)  # (k, 1)
+
+    start_token = '<start>'
+    idx_start_token = word_map[start_token]
+    inputs = idx_start_token # rename to get previous index
+    seq = ['<start>']
+    
+    for previous_word_idx in range(max_len):
+        
+        print(decoder.embedding)
+        print(idx_start_token)
+        # unless pred word is <end>
+        embeddings = decoder.embedding(torch.LongTensor(inputs).cuda()).squeeze(1) # (s, embed_dim)
+        # FROM CAPTION.PY
+        print(idx_start_token)
+        print(embeddings.shape)
+        
+        h, c = decoder.decode_step(embeddings, (h, c))  # (s, decoder_dim)
+
+        #sequence = [word_map[s] for s in in_text.split(" ") if s in word_map]
+        #print('sequence', sequence)
+        scores = decoder.fc(h)  # (s, vocab_size) # fully connected layer maps to vocab size (logits)
+        print('scores')
+        print(scores)
+        scores = F.log_softmax(scores, dim=1) # turn logits into probabilities
+        print('log to probabilities')
+        print(scores)
+        # highest is the index of the biggest score
+        # make sure highest is an INDEX!!!
+        highest = torch.argmax(scores) # return highest probability
+        print('highest score')
+        print(highest)
+
+        word = word_map[highest] # get word from word map
+        print('word mapped to')
+        print(word)
+        seq.append(word)
+        
+        inputs = highest
+        
+        print('in_text update', in_text)
+        if word == '<end>':
+            break
+            
+    final = in_text.split()
+    print('final split')
+    print(final)
+    final = final[1:-1]
+    print('final')
+    print(final)
+
+    return final
+
+
+
+    # torch max
+    # torch argmax
 
 
 if __name__ == '__main__':
@@ -77,7 +135,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Load model
-    checkpoint = torch.load(args.model, map_location=str(device))
+    #checkpoint = torch.load(args.model, map_location=str(device))
+    checkpoint = torch.load(args.model, map_location='cuda:2')
     decoder = checkpoint['decoder']
     decoder = decoder.to(device)
     decoder.eval()
