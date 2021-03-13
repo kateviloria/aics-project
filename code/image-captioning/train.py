@@ -10,9 +10,10 @@ from datasets import *
 from utils import *
 from nltk.translate.bleu_score import corpus_bleu
 
+# added 2 in both names for second trial of training!
 # Data parameters
-data_folder = '/home/gusviloca@GU.GU.SE/aics-vizwiz/out_data'  # folder with data files saved by create_input_files.py
-data_name = 'vizwiz_5_cap_per_img_5_min_word_freq'  # base name shared by data files
+data_folder = '/home/gusviloca@GU.GU.SE/aics-vizwiz/out_data2'  # folder with data files saved by create_input_files.py
+data_name = '2vizwiz_5_cap_per_img_5_min_word_freq'  # base name shared by data files
 
 # Model parameters
 emb_dim = 512  # dimension of word embeddings

@@ -73,15 +73,18 @@ def get_greedy_caption(encoder, decoder, image_path, word_map):
     
     for previous_word_idx in range(max_len):
         
-        print(decoder.embedding)
-        print(idx_start_token)
+        print('decoder.embedding', decoder.embedding)
+        print('idx_start_token', idx_start_token)
+        print('before embeddings')
         # unless pred word is <end>
         embeddings = decoder.embedding(torch.LongTensor(inputs).cuda()).squeeze(1) # (s, embed_dim)
         # FROM CAPTION.PY
+
         print(idx_start_token)
         print(embeddings.shape)
-        
+
         h, c = decoder.decode_step(embeddings, (h, c))  # (s, decoder_dim)
+        print('after h,c')
 
         #sequence = [word_map[s] for s in in_text.split(" ") if s in word_map]
         #print('sequence', sequence)
