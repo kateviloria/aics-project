@@ -47,7 +47,7 @@ def get_greedy_caption(encoder, decoder, image_path, word_map):
     enc_image_size = encoder_out.size(1)
     encoder_dim = encoder_out.size(3)
 
-    # Flatten encoding
+    # Flatten encoding --> pass through LSTM (need 2-dimensional)
     encoder_out = encoder_out.view(1, -1, encoder_dim)  # (1, num_pixels, encoder_dim)
     num_pixels = encoder_out.size(1)
 
@@ -63,6 +63,7 @@ def get_greedy_caption(encoder, decoder, image_path, word_map):
     #print('c')
     #print(c)
 
+    # test 
     # Tensor to store predicted word at each step; now they're just <start>
     # start = torch.LongTensor([[word_map['<start>' * k ]]]).to(device)  # (k, 1)
 
@@ -83,6 +84,7 @@ def get_greedy_caption(encoder, decoder, image_path, word_map):
         print(idx_start_token)
         print(embeddings.shape)
 
+        # why do i do this twice
         h, c = decoder.decode_step(embeddings, (h, c))  # (s, decoder_dim)
         print('after h,c')
 

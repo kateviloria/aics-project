@@ -240,3 +240,9 @@ if __name__ == '__main__':
 
     # Visualize caption and attention of best sequence
     #visualize_att(args.img, seq, alphas, rev_word_map, args.smooth)
+
+    """
+    Command
+
+    python caption.py --img /home/gusviloca@GU.GU.SE/aics-vizwiz/data/vizwiz_images/VizWiz_train_00008121.jpg --model /home/gusviloca@GU.GU.SE/aics-vizwiz/code/image-captioning/BEST_checkpoint_vizwiz_5_cap_per_img_5_min_word_freq.pth.tar --word_map /home/gusviloca@GU.GU.SE/aics-vizwiz/out_data/WORDMAP_vizwiz_5_cap_per_img_5_min_word_freq.json
+    """
