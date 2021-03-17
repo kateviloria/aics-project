@@ -1,4 +1,3 @@
-# v2
 import glob
 from IPython.display import Image
 import random
@@ -52,7 +51,7 @@ print('unique no. of reject ids aka images', len(reject_ids_unique))
 precanned_ids_unique = list(set(precanned_ids))
 print('unique no. of precanned ids aka images', len(precanned_ids_unique))
 
-all_rejects = reject_ids_unique + precanned_ids_unique
+all_rejects = list(set(reject_ids_unique + precanned_ids_unique))
 
 # delete rows where caption was rejected or precanned
 anns_filtered_rejected = anns_df[~anns_df['image_id'].isin(reject_ids_unique)]
