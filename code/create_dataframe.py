@@ -1,3 +1,4 @@
+# v2
 import glob
 from IPython.display import Image
 import random
@@ -30,29 +31,43 @@ images_df = pd.json_normalize(anns_dict, record_path=['images'])
 # annotations dict to df
 anns_df = pd.json_normalize(anns_dict, record_path=['annotations'])
 
-# check how many are rejected (spam)
+# check how many are rejected (spam) and precanned
 reject_captions = anns_df.loc[anns_df.is_rejected == True, 'is_rejected'].count()
 print('no. of rejected captions', reject_captions)
 
-# give id of rejected captions
+precanned_captions = anns_df.loc[anns_df.is_precanned == True, 'is_precanned'].count()
+print('no. of precanned captions', precanned_captions)
+
+# give id of rejected captions and precanned
 reject_ids = anns_df.loc[anns_df['is_rejected'] == True, 'image_id'].tolist()
 print('no. of reject ids', len(reject_ids))
 
+precanned_ids = anns_df.loc[anns_df['is_precanned'] == True, 'image_id'].tolist()
+print('no. of precanned ids', len(precanned_ids))
+
 # all images that must be dropped
-reject_ids_unique = set(reject_ids)
+reject_ids_unique = list(set(reject_ids))
 print('unique no. of reject ids aka images', len(reject_ids_unique))
 
-# delete rows where caption was rejected
-anns_filtered = anns_df[~anns_df['image_id'].isin(reject_ids_unique)]
+precanned_ids_unique = list(set(precanned_ids))
+print('unique no. of precanned ids aka images', len(precanned_ids_unique))
+
+all_rejects = reject_ids_unique + precanned_ids_unique
+
+# delete rows where caption was rejected or precanned
+anns_filtered_rejected = anns_df[~anns_df['image_id'].isin(reject_ids_unique)]
+
+anns_filtered_precanned = anns_filtered_rejected[~anns_filtered_rejected['image_id'].isin(precanned_ids_unique)]
 
 # unique list of image_ids in anns
-non_rejects = list(anns_filtered.image_id.unique())
+non_rejects = list(anns_filtered_precanned.image_id.unique())
 print('len non rejects', len(non_rejects))
 
 # delete images that had captions that were rejected
-images_filtered = images_df[~images_df['id'].isin(reject_ids_unique)]
+images_filtered = images_df[~images_df['id'].isin(all_rejects)]
 print(images_filtered.shape)
 
+#HERE
 # check if both filtered dfs have the same number of image_ids
 image_ids = list(images_filtered.id.unique())
 assert len(non_rejects)==len(image_ids)
@@ -61,9 +76,9 @@ assert len(non_rejects)==len(image_ids)
 filename_to_id = dict(zip(images_filtered.id, images_filtered.file_name))
 
 # use filename_to_id to fill in column in anns_filtered to add filename
-anns_filtered['file_name'] = anns_filtered['image_id'].map(filename_to_id) 
+anns_filtered_precanned['file_name'] = anns_filtered_precanned['image_id'].map(filename_to_id) 
 
-new_df = anns_filtered
+new_df = anns_filtered_precanned
 
 # reorganise columns and rename id to caption id to decrease confusion between image_id
 new_df = new_df.rename(columns={'id': 'caption_id'})

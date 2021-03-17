@@ -30,4 +30,8 @@ Here is your wiki where you can document all stages of the project and save inte
 
 **Week 11**
 - Retrying greedy caption code, still having problems with GPU
-- 
+
+**Week 12**
+- Ran greedy (for few images), results not great, need to reevaluate dataset
+    - Model might be overfitting "quality issues are too severe to recognize visual content"
+    - Part of captions that some annotators included when pictures were indistinct
