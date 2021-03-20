@@ -89,7 +89,13 @@ class Attention(nn.Module):
         :param decoder_hidden: previous decoder output, a tensor of dimension (batch_size, decoder_dim)
         :return: attention weighted encoding, weights
         """
+
+        # puts them in the same space
+
+        # image representation
         att1 = self.encoder_att(encoder_out)  # (batch_size, num_pixels, attention_dim)
+
+        # hidden state
         att2 = self.decoder_att(decoder_hidden)  # (batch_size, attention_dim)
         
         # a very important step
@@ -99,7 +105,7 @@ class Attention(nn.Module):
 
         # visual sentinel here ish
         
-        # probabilities of looking at regions
+        # probabilities of looking at regions (alpha scores for images)
         alpha = self.softmax(att)  # (batch_size, num_pixels)
 
         # now we are making regions with high probabilities more important, while the rest is less important
@@ -223,16 +229,22 @@ class DecoderWithAttention(nn.Module):
             # how many elements from captions to process for this timestamp?
             # a smart solution to take only elements which are not pads
             batch_size_t = sum([l > t for l in decode_lengths])
-            attention_weighted_encoding, alpha = self.attention(encoder_out[:batch_size_t],
-                                                                h[:batch_size_t])
+            attention_weighted_encoding, alpha = self.attention(encoder_out[:batch_size_t], # image information
+                                                                h[:batch_size_t]) # image + language info
+
+            # gate decides what information in the hidden state is important
             gate = self.sigmoid(self.f_beta(h[:batch_size_t]))  # gating scalar, (batch_size_t, encoder_dim)
+
+            # multiplies with image attention
             attention_weighted_encoding = gate * attention_weighted_encoding
+
+            # feeds embedding of current word and attention
             h, c = self.decode_step(
                 torch.cat([embeddings[:batch_size_t, t, :], attention_weighted_encoding], dim=1),
                 (h[:batch_size_t], c[:batch_size_t]))  # (batch_size_t, decoder_dim)
             preds = self.fc(self.dropout(h))  # (batch_size_t, vocab_size)
-            predictions[:batch_size_t, t, :] = preds
+            predictions[:batch_size_t, t, :] = preds # add prediction at the end 
             alphas[:batch_size_t, t, :] = alpha
 
-
+            # encoded_captions = ordered for padding, get original order for loss
         return predictions, encoded_captions, decode_lengths, alphas, sort_ind

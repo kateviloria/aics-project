@@ -15,10 +15,93 @@ from skimage.transform import resize
 #from skimage.transform import resize
 #from PIL import Image
 
-device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+def caption_greedy(encoder, decoder, image_path, word_map, max_length):
+    vocab_size = len(word_map)
 
+    # Read image and process
+    img = imageio.imread(image_path)
+    if len(img.shape) == 2:
+        img = img[:, :, np.newaxis]
+        img = np.concatenate([img, img, img], axis=2)
+    img = resize(img, (256, 256))
+    img = img.transpose(2, 0, 1)
+    img = img / 255.
+    img = torch.FloatTensor(img).to(device)
+    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                    std=[0.229, 0.224, 0.225])
+    transform = transforms.Compose([normalize])
+    image = transform(img)  # (3, 256, 256)
+    #print(image)
 
+    # Encode
+    image = image.unsqueeze(0)  # (1, 3, 256, 256)
+    encoder_out = encoder(image)  # (1, enc_image_size, enc_image_size, encoder_dim)
+    enc_image_size = encoder_out.size(1)
+    encoder_dim = encoder_out.size(3)
+    print(encoder_out.shape)
+
+    # Flatten encoding
+    encoder_out = encoder_out.view(1, -1, encoder_dim)  # (1, num_pixels, encoder_dim)
+    #print(encoder_out)
+    num_pixels = encoder_out.size(1)
+
+    mean_encoder_out = encoder_out.mean(dim=1)
+    h = decoder.init_h(mean_encoder_out)  # (batch_size, decoder_dim)
+    c = decoder.init_c(mean_encoder_out)
+
+    # keys of start and end tokens
+    start_key = next((k for k in rev_word_map if rev_word_map[k] == '<start>'), None)
+    end_key = next((k for k in rev_word_map if rev_word_map[k] == '<end>'), None)
+    start_key = torch.tensor(start_key).to(device)
+
+    seq = []
+    seq_alphas = []
+    #input_embedding = decoder.embedding(idx_start_token)
+
+    input_embedding = decoder.embedding(start_key)
+    input_embedding = torch.unsqueeze(input_embedding, 0).to(device)
+
+    for t in range(max_length):
+        
+        attention_weighted_encoding, alpha = decoder.attention(encoder_out, # image information
+                                                            h) # image + language info
+        
+        seq_alphas.append(alpha)
+
+        # gate decides what information in the hidden state is important
+        gate = decoder.sigmoid(decoder.f_beta(h))  # gating scalar, (batch_size_t, encoder_dim)
+
+        # multiplies with image attention
+        attention_weighted_encoding = gate * attention_weighted_encoding
+        #print('attention_weighted_encoding', attention_weighted_encoding.shape)
+        
+        # print(input_embedding.shape)
+        # feeds embedding of current word and attention
+        h, c = decoder.decode_step(
+            torch.cat([input_embedding, attention_weighted_encoding], dim=1),
+            (h, c))  # (batch_size_t, decoder_dim)
+        
+        scores = decoder.fc(h)  # (s, vocab_size) # fully connected layer maps to vocab size (logits)
+        scores = F.log_softmax(scores, dim=1) # turn logits into probabilities
+        # highest is the index of the biggest score
+        # make sure highest is an INDEX!!!
+        #print(scores)
+        highest = torch.argmax(scores) # return highest probability
+        #print(highest)
+        word_string = rev_word_map[highest.item()] # get word from word map
+        
+        seq.append(word_string)
+
+        input_embedding = decoder.embedding(highest).unsqueeze(0)
+
+        #print(word_string)
+        if word_string == '<end>':
+            break
+            
+    return seq, seq_alphas
+    
 def caption_image_beam_search(encoder, decoder, image_path, word_map, beam_size=3):
     """
     Reads an image and captions it with beam search.
@@ -95,7 +178,7 @@ def caption_image_beam_search(encoder, decoder, image_path, word_map, beam_size=
         alpha = alpha.view(-1, enc_image_size, enc_image_size) # (s, enc_image_size, enc_image_size)
 
         gate = decoder.sigmoid(decoder.f_beta(h))  # gating scalar, (s, encoder_dim)
-        awe = (gate * awe)
+        awe = (gate * awe) # awe = attention weight encoder
 
         h, c = decoder.decode_step(torch.cat([embeddings, awe], dim=1), (h, c))  # (s, decoder_dim)
 
@@ -165,44 +248,47 @@ def caption_image_beam_search(encoder, decoder, image_path, word_map, beam_size=
     return seq, alphas
 
 
-def visualize_att(image_path, seq, alphas, rev_word_map, smooth=True):
-    """
-    Visualizes caption with weights at every word.
+def visualize_att(image_path, seq, seq_alphas, rev_word_map, smooth=True):
+    # subplot settings
+    num_col = 4
+    num_row = len(seq_alphas) // num_col + 2
+    subplot_size = 4
 
-    Adapted from paper authors' repo: https://github.com/kelvinxu/arctic-captions/blob/master/alpha_visualization.ipynb
+    fig = plt.figure(dpi=100)
+    fig.set_size_inches(subplot_size * num_col, subplot_size * (num_row + 1))
+    fig.set_facecolor('white')
 
-    :param image_path: path to image that has been captioned
-    :param seq: caption
-    :param alphas: weights
-    :param rev_word_map: reverse word mapping, i.e. ix2word
-    :param smooth: smooth weights?
-    """
-    image = Image.open(image_path)
-    #image = image.resize([14 * 24, 14 * 24], Image.LANCZOS)
-    image = resize([14 * 24, 14 * 24], Image.LANCZOS)
+    # generate caption results
+    print("Visualizing results...")
+    plt.subplot2grid((num_row, num_col), (0, 0))
+    image = imageio.imread(image_path)
+    plt.imshow(image)
+    plt.axis('off')
+    plt.subplot2grid((num_row, num_col), (0, 1), colspan=num_col-1)
+    plt.text(0, 0.5, seq, fontsize=16)
+    plt.axis('off')
 
-    words = [rev_word_map[ind] for ind in seq]
-
-    for t in range(len(words)):
-        if t > 50:
-            break
-        plt.subplot(np.ceil(len(words) / 5.), 5, t + 1)
-
-        plt.text(0, 1, '%s' % (words[t]), color='black', backgroundcolor='white', fontsize=12)
+    # visualize attention weights
+    print("Visualizing attention weights...\n")
+    for i in range(len(seq_alphas)):
+        plt.subplot2grid((num_row, num_col), (i // num_col + 1, i % num_col))
+        #attention = seq_alphas[i][2].data.cpu().numpy()
+        attention = seq_alphas[i].data.cpu().numpy()
+        attention = skimage.transform.pyramid_expand(attention.reshape(14, 14), upscale=32, sigma=20)
+        #attention = skimage.transform.pyramid_expand(attention, upscale=32, sigma=20)
         plt.imshow(image)
-        current_alpha = alphas[t, :]
-        if smooth:
-            alpha = skimage.transform.pyramid_expand(current_alpha.numpy(), upscale=24, sigma=8)
-        else:
-            alpha = skimage.transform.resize(current_alpha.numpy(), [14 * 24, 14 * 24])
-        if t == 0:
-            plt.imshow(alpha, alpha=0)
-        else:
-            plt.imshow(alpha, alpha=0.8)
-        plt.set_cmap(cm.Greys_r)
-        plt.axis('off')
-    plt.show()
+        plt.imshow(attention, alpha=0.8)
+        #plt.text(0, 0, seq_alphas[i], fontsize=16, color='black', backgroundcolor='white')
+        #plt.set_cmap(cm.Greys_r)
+        #plt.axis('off')
 
+    # fig.tight_layout()
+    fig_output_dir = '/home/gusviloca@GU.GU.SE/aics-vizwiz/figs'
+    image_file = image_path.split('/')[-1]
+    image_file = image_file[:-4]
+    plt.savefig('/home/gusviloca@GU.GU.SE/aics-vizwiz/figs/{}.png'.format(image_file), bbox_inches="tight")
+    #plt.savefig("outputs/vis/{}/{}.png".format(dir_name, outname), bbox_inches="tight")
+    fig.clf()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -210,7 +296,8 @@ if __name__ == '__main__':
     parser.add_argument('--img', '-i', help='path to image')
     parser.add_argument('--model', '-m', help='path to model')
     parser.add_argument('--word_map', '-wm', help='path to word map JSON')
-    parser.add_argument('--beam_size', '-b', default=5, type=int, help='beam size for beam search')
+    # parser.add_argument('--beam_size', '-b', default=5, type=int, help='beam size for beam search')
+    #parser.add_argument('--max_len', '-max', help='maximum caption length')
     parser.add_argument('--dont_smooth', dest='smooth', action='store_false', help='do not smooth alpha overlay')
 
     args = parser.parse_args()
@@ -229,17 +316,21 @@ if __name__ == '__main__':
         word_map = json.load(j)
     rev_word_map = {v: k for k, v in word_map.items()}  # ix2word
 
+    max_len = 50
+
+    # NEED TO EDIT FOR GREEDY
     # Encode, decode with attention and beam search
-    seq, alphas = caption_image_beam_search(encoder, decoder, args.img, word_map, args.beam_size)
-    alphas = torch.FloatTensor(alphas)
+    seq, seq_alphas = caption_greedy(encoder, decoder, args.img, word_map, max_len)
+    print('Generated Caption:', seq)
+    #alphas = torch.FloatTensor(alphas)
     
-    decoded_seq = []
-    for item in seq:
-        decoded_seq.append(rev_word_map[item])
-    print(decoded_seq)
+    #decoded_seq = []
+    #for item in seq:
+    #    decoded_seq.append(rev_word_map[item])
+    #print(decoded_seq)
 
     # Visualize caption and attention of best sequence
-    #visualize_att(args.img, seq, alphas, rev_word_map, args.smooth)
+    visualize_att(args.img, seq, seq_alphas, rev_word_map, args.smooth)
 
     """
     Command

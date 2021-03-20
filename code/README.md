@@ -15,5 +15,10 @@ python train.py
 - nested dictionary saved as JSON file
 
 ##### data_prepare.py  
+- creates and prepares input files by splits (training, validation, and test) using vizwiz_annotations.json
+- creates word map and saves as JSON file
 
-##### train.py
+##### train.py  
+
+
+##### test.py  
