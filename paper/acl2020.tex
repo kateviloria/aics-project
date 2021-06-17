@@ -23,7 +23,7 @@
 % and will typically save some space.
 \usepackage{microtype}
 
-%\aclfinalcopy % Uncomment this line for the final submission
+\aclfinalcopy % Uncomment this line for the final submission
 %\def\aclpaperid{***} %  Enter the acl Paper ID here
 
 %\setlength\titlebox{5cm}
@@ -34,18 +34,11 @@
 
 \newcommand\BibTeX{B\textsc{ib}\TeX}
 
-\title{Instructions for ACL 2020 Proceedings}
+\title{Evaluating the Efficacy of Attention Mechanisms on the Captioning of Images Taken by Visually Impaired People}
 
-\author{First Author \\
-  Affiliation / Address line 1 \\
-  Affiliation / Address line 2 \\
-  Affiliation / Address line 3 \\
-  \texttt{email@domain} \\\And
-  Second Author \\
-  Affiliation / Address line 1 \\
-  Affiliation / Address line 2 \\
-  Affiliation / Address line 3 \\
-  \texttt{email@domain} \\}
+\author{Catherine Viloria \\
+  University of Gothenburg \\ 
+  \texttt{gusviloca@student.gu.se}}
 
 \date{}
 
@@ -58,28 +51,16 @@ These instructions should be used for both papers submitted for review and for f
 Authors are asked to conform to all the directions reported in this document.
 \end{abstract}
 
-\section{Credits}
-
-This document has been adapted
-by Steven Bethard, Ryan Cotterrell and Rui Yan
-from the instructions for earlier ACL and NAACL proceedings, including those for 
-ACL 2019 by Douwe Kiela and Ivan Vuli\'{c},
-NAACL 2019 by Stephanie Lukin and Alla Roskovskaya, 
-ACL 2018 by Shay Cohen, Kevin Gimpel, and Wei Lu, 
-NAACL 2018 by Margaret Michell and Stephanie Lukin,
-2017/2018 (NA)ACL bibtex suggestions from Jason Eisner,
-ACL 2017 by Dan Gildea and Min-Yen Kan, 
-NAACL 2017 by Margaret Mitchell, 
-ACL 2012 by Maggie Li and Michael White, 
-ACL 2010 by Jing-Shing Chang and Philipp Koehn, 
-ACL 2008 by Johanna D. Moore, Simone Teufel, James Allan, and Sadaoki Furui, 
-ACL 2005 by Hwee Tou Ng and Kemal Oflazer, 
-ACL 2002 by Eugene Charniak and Dekang Lin, 
-and earlier ACL and EACL formats written by several people, including
-John Chen, Henry S. Thompson and Donald Walker.
-Additional elements were taken from the formatting instructions of the \emph{International Joint Conference on Artificial Intelligence} and the \emph{Conference on Computer Vision and Pattern Recognition}.
-
 \section{Introduction}
+
+Image caption generation continues to be a pertinent task within both the computer vision community and the natural language processing (NLP) research field. However, it is important for researchers to also consider how advancements in this field can and will affect users in the real world. Developing models that will be able to effectively and efficiently assist visually impaired users in their day-to-day lives is a challenge in the field to this day. Models that are considered to have a high performance in automatically generating captions will not necessarily perform well in a domain-specific task. Captions for the visually impaired must be detailed yet concise and prioritise the objects of interest within the image. Another factor that could affect a model’s performance would be the quality of the images that are typically associated with caption generation for this task. It is not uncommon for images to be in the wrong orientation, unfocused, and out of frame. While any improvement in image captioning is still a step forward, critically examining applications of these models in situations that are not as contrived is extremely important. 
+
+In this project, the VizWiz dataset presented by \citet{Gurari-2020-captioning}, specifically created to represent the blind and visually impaired community, is used to train an encoder-decoder model with attention to examine how a standard image captioning model will perform in generating captions for the visually impaired. Evaluating the neural image caption generator with visual attention presented by \citet{Xu-2015-show-attend} through a domain-specific lens is important for the community being affected but also will have research-related contributions. Choosing to assess a model in this way presents nuances that are sometimes overlooked when implementing these models. It will also shed light on how humans would approach a task and eventually the possibility of replicating said modus operandi or intuition in a model. 
+
+The following sections are organised as follows. Section 2 introduces image caption generation and the models and attention mechanism that precede what was implemented for this paper. In Section 3, the VizWiz dataset and specifics of the model implementation are given. The results are presented in Section 4. Section 5 discusses the results. Specific plans for future work are defined in Section 6 and it is followed by the conclusion and references in Section 7 and 8.
+
+
+\section{Related Work}
 
 The following instructions are directed to authors of papers submitted to ACL 2020 or accepted for publication in its proceedings.
 All authors are required to adhere to these specifications.
@@ -87,7 +68,7 @@ Authors are required to provide a Portable Document Format (PDF) version of thei
 \textbf{The proceedings are designed for printing on A4 paper.}
 
 
-\section{Electronically-available resources}
+\section{Dataset & Methodology}
 
 ACL provides this description and accompanying style files at
 \begin{quote}
