@@ -18,6 +18,7 @@ from skimage.transform import resize
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 def caption_greedy(encoder, decoder, image_path, word_map, max_length):
+    
     vocab_size = len(word_map)
 
     # Read image and process
@@ -319,7 +320,7 @@ if __name__ == '__main__':
     max_len = 50
 
     # NEED TO EDIT FOR GREEDY
-    # Encode, decode with attention and beam search
+    # Encode, decode with attention and greedy search
     seq, seq_alphas = caption_greedy(encoder, decoder, args.img, word_map, max_len)
     print('Generated Caption:', seq)
     #alphas = torch.FloatTensor(alphas)
