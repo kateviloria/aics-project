@@ -22,6 +22,9 @@
 % but it will improve the layout of the manuscript,
 % and will typically save some space.
 \usepackage{microtype}
+\usepackage{graphicx}
+\graphicspath{ {images/} }
+\raggedbottom
 
 \aclfinalcopy % Uncomment this line for the final submission
 %\def\aclpaperid{***} %  Enter the acl Paper ID here
@@ -66,28 +69,37 @@ The combination of NIC and an attention mechanism resulted in the model implemen
 
 \section{Dataset \& Methodology}
 \subsection{VizWiz Dataset}
-The domain-specific dataset used for this experiment was the VizWiz dataset. It is comprised of 39,181 images taken by people who are either blind or visually impaired. Each image is paired with 5 human-made captions collected through crowdsourcing via Amazon’s Mechanical Turk. 
+The domain-specific dataset used for this project was the VizWiz dataset \footnote{\url{https://vizwiz.org/}}. It is comprised of 39,181 images taken by people who are either blind or visually impaired. The images of the dataset come from a mobile phone application made to support real-world users through their visual description service. Users take a picture, record a spoken question and are then connected with people that could assist them. The VizWiz dataset has also been developed for various computer vision tasks, all related and extremely useful for the visually impaired community: image captioning, image quality assessment, visual question answering (VQA), answer-difference reasoning, vision skills for VQA, and visual privacy recognition. The VizWiz dataset is “a valuable foundation for designing more generalized computer vision algorithms that meet the large diversity of needs for real end users” \citep{Gurari-2020-captioning}. 
+
+\subsubsection{VizWiz-Captions Dataset}
+For this project, the VizWiz-Captions dataset \footnote{\url{https://vizwiz.org/tasks-and-datasets/image-captioning/}} was used. Each image is paired with 5 human-made captions collected through crowdsourcing via Amazon Mechanical Turk. Due to GPU limitations and consciousness of memory usage, only the training dataset was used. The training dataset originally had 23,141 images and 117,155 captions. After examining some of the metadata included in the dataset, a filtering process was conducted. If an image was considered to be spam (\emph{is\_rejected} column) or considered to have quality issues by annotators (\emph{is\_precanned} column, if True had “Quality issues are too severe to recognize visual content.” as its caption), they were filtered out of the dataset. Images with the characteristic of having text were kept since text is one of the main reasons why someone who is visually impaired would need assistance. After filtering, there were 14,790 images left and the model implementation was done with a 60/20/20 train, validation, test split (8,874 train, 2,958 validation, and 2,958 test).
+
+\subsubsection{Annotator Reliability \& Ethical Considerations}
+Although it is incredibly important to collect human-made captions for any text generation task, the process and its output also present some challenges and factors that must be considered. While it is greatly advantageous for a model to learn from human-made captions, humans are not perfect and also make mistakes. Crowdsourcing allows researchers to reach a larger, more widespread and diverse demographic but it also makes it much more difficult to oversee and guide annotators to ensure that the captions being made are of the best quality. The instructions provided to annotators presented in \citet{Gurari-2020-captioning}, while understandably so given the conditions of the annotation process, were very concise and left space for restrictions on the annotators that would affect the dataset and future model implementations.  
+
+Examples of instructions that could lead to problems when training models are: “Include at least eight words.”, “Describe all parts of the image that may be important to a person who is blind.”, and “If text is in the image, and is important, then you can summarize what it says. DO NOT use all the specific phrases that you see in the image as your description of the image.” \citep{Gurari-2020-captioning} If an annotator was able to effectively describe an image with 4 words (e.g. “Can of mushroom soup.”), they are then required to add additional information that might not be neither useful nor necessary. The second instruction can also be interpreted as subjective and what one annotator thinks is useful information for a person who is blind, another annotator might not think similarly. Finally, the third instruction requiring a summarization of text that appears in an image rather than providing a word-for-word description makes it extremely difficult to ground any generated caption for a model. Although text summarization would be useful for this real-world task, it is a completely different task that is overlooked when training an image caption generator. 
+
+Since annotators were also found through crowdsourcing, annotator reliability could possibly be a point of contention. Not only are the annotators’ backgrounds unknown, they are also inconsistent. In an ideal world, it would have been better to have real-world users with high ratings of the mobile application to come in and annotate images as they have domain-specific knowledge and skills. Ethical concerns may also affect the quality of work annotators submit. It is extremely important to acknowledge the absolutely dismal wages provided to annotators through Amazon Mechanical Turk.\citep{hara2018amazon} The low wages and absence of work benefits can also affect the care and quality of the captions made by annotators. With these considerations, an example is provided in \autoref{fig:vwcaption} of how varied and inconsistent the quality and structure of captions can be within the dataset. The variation in complexity and length is quite large and can be argued to be either advantageous or disadvantageous for a model when training. 
+
+\begin{figure}[h]
+  \includegraphics[width=\linewidth]{VizWiz_train_00011794_captioned.png}
+  \caption{An image from the VizWiz-Captions dataset and 5 captions from 5 different annotators.}
+  \label{fig:vwcaption}
+\end{figure}
+
+\subsection{Model Architecture}
+The model implemented was an encoder-decoder with an attention mechanism. The PyTorch Tutorial to Image Captioning by Sagar Vinodababu\footnote{\url{https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Image-Captioning#training}} was followed and the implementation included an encoder that was pretrained on ResNet. The encoder is responsible for taking the images as input and transforming it into smaller representations. It returns a “state” that is fed into the decoder. The decoder is then responsible for interpreting the output of the encoder. It also calculates the attention weights for the image. (*also generates caption/ language model??)
+
+Creating low-level representations when passed through the encoder seemed like a good approach for this task since a lot of images in the dataset only have one object as the focal point and this object is only partially shown in the image. A lower-level representation or a representation that is closer to what the image actually looks like would be very helpful rather than having a representation that is an average of everything in the picture. This approach would be called the top-down approach—contrasted with the bottom-up approach which is good for semantically-rich images where multiple objects within the image are first identified and then given to the encoder. Datasets that have high-quality and semantically-rich images, such as MSCOCO, are more ideal for the top-down approach.**NEED TO REFER TO ANDERSON (2018)??? 
+
+During training, sequences are padded then ordered by length in order to minimise computations (****???wording). Word embeddings, attention weights, and the decoder all have a dimension of 512 with a batch size of 32. The encoder’s learning rate was 0.0001 and the decoder’s learning rate was 0.0004. Early stopping was implemented after 20 epochs of no improvement. These hyperparameters and implementations were all chosen through the tutorial source.  
+
+The greedy search algorithm was implemented for generating captions. In the greedy search algorithm, when given a number of choices in the next stage, the model will always choose the best immediate output. For this task, the language model takes the vocabulary’s logits and turns them into probabilities. This is then fed to the greedy search algorithm where it chooses the highest probable word to occur next at each stage. However, greedy search also has its drawbacks. Since it only chooses the best immediate output and does not look farther ahead, it has a higher chance of not reaching the globally optimum solution—hence its name, \emph{greedy} search.
+
+
 
 \section{Results}
-\label{sec:length}
-
-The conference accepts submissions of long papers and short papers.
-Long papers may consist of up to eight (8) pages of content plus unlimited pages for references.
-Upon acceptance, final versions of long papers will be given one additional page -- up to nine (9) pages of content plus unlimited pages for references -- so that reviewers' comments can be taken into account.
-Short papers may consist of up to four (4) pages of content, plus unlimited pages for references.
-Upon acceptance, short papers will be given five (5) pages in the proceedings and unlimited pages for references. 
-For both long and short papers, all illustrations and tables that are part of the main text must be accommodated within these page limits, observing the formatting instructions given in the present document.
-Papers that do not conform to the specified length and formatting requirements are subject to be rejected without review.
-
-The conference encourages the submission of additional material that is relevant to the reviewers but not an integral part of the paper.
-There are two such types of material: appendices, which can be read, and non-readable supplementary materials, often data or code.
-Additional material must be submitted as separate files, and must adhere to the same anonymity guidelines as the main paper.
-The paper must be self-contained: it is optional for reviewers to look at the supplementary material.
-Papers should not refer, for further detail, to documents, code or data resources that are not available to the reviewers.
-Refer to Appendices~\ref{sec:appendix} and \ref{sec:supplemental} for further information. 
-
-Workshop chairs may have different rules for allowed length and whether supplemental material is welcome.
-As always, the respective call for papers is the authoritative source.
+\label{sec:results}
 
 
 \section{Discussion}
