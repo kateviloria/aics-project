@@ -45,46 +45,30 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-This document contains the instructions for preparing a manuscript for the proceedings of ACL 2020.
-The document itself conforms to its own specifications, and is therefore an example of what your manuscript should look like.
-These instructions should be used for both papers submitted for review and for final versions of accepted papers.
-Authors are asked to conform to all the directions reported in this document.
+yaaa
 \end{abstract}
 
 \section{Introduction}
 
 Image caption generation continues to be a pertinent task within both the computer vision community and the natural language processing (NLP) research field. However, it is important for researchers to also consider how advancements in this field can and will affect users in the real world. Developing models that will be able to effectively and efficiently assist visually impaired users in their day-to-day lives is a challenge in the field to this day. Models that are considered to have a high performance in automatically generating captions will not necessarily perform well in a domain-specific task. Captions for the visually impaired must be detailed yet concise and prioritise the objects of interest within the image. Another factor that could affect a model’s performance would be the quality of the images that are typically associated with caption generation for this task. It is not uncommon for images to be in the wrong orientation, unfocused, and out of frame. While any improvement in image captioning is still a step forward, critically examining applications of these models in situations that are not as contrived is extremely important. 
 
-In this project, the VizWiz dataset presented by \citet{Gurari-2020-captioning}, specifically created to represent the blind and visually impaired community, is used to train an encoder-decoder model with attention to examine how a standard image captioning model will perform in generating captions for the visually impaired. Evaluating the neural image caption generator with visual attention presented by \citet{Xu-2015-show-attend} through a domain-specific lens is important for the community being affected but also will have research-related contributions. Choosing to assess a model in this way presents nuances that are sometimes overlooked when implementing these models. It will also shed light on how humans would approach a task and eventually the possibility of replicating said modus operandi or intuition in a model. 
+In this project, the VizWiz dataset presented by \citet{Gurari-2020-captioning}, specifically created to represent the blind and visually impaired community, is used to train an encoder-decoder model with attention to examine how a standard image captioning model will perform in generating captions for the visually impaired. Evaluating the neural image caption generator with visual attention presented by \citet{Xu-2015-show-attend} through a domain-specific lens is important for the community being affected but also will have research-related contributions. Choosing to assess a model in this way presents nuances that are sometimes overlooked when implementing these models. It will also shed light on how humans would approach a task and eventually the possibility of replicating said modus operandi or intuition in a model. The problem of the gap between the two modalities—image and text—presented in \citet{Bernardi-2016-automatic} is also discussed. The extent of how bad this problem will be in this model is shown to be exacerbated because of the dataset used since grounding becomes an even more difficult task. 
 
-The following sections are organised as follows. Section 2 introduces image caption generation and the models and attention mechanism that precede what was implemented for this paper. In Section 3, the VizWiz dataset and specifics of the model implementation are given. The results are presented in Section 4. Section 5 discusses the results. Specific plans for future work are defined in Section 6 and it is followed by the conclusion and references in Section 7 and 8.
-
+The following sections are organised as follows. Section 2 introduces image caption generation and the models and attention mechanism that precede what was implemented for this paper. In Section 3, the VizWiz dataset and specifics of the model implementation are given. The results are presented in Section 4. Section 5 discusses the results. Specific plans for future work are defined in Section 6 and it is followed by the conclusion and future work in Section 7. References are provided in Section 8.
 
 \section{Related Work}
+Automatic description generation from images has been a challenging task that both the computer vision and natural language processing communities have taken an interest in. \citet{Bernardi-2016-automatic} surveys the current approaches to this task and classifies these approaches through how they conceptualise the problem—either a generation problem, a retrieval from a visual space problem, or a retrieval from a multimodal space problem. All three approaches have their advantages and disadvantages. The first two approaches choose to rely more heavily on one modality (visual or textual) to base the predictions for generating captions while the third approach attempts to combine both representations to make the final image description. The implementation in this paper is the third approach. This approach attempts to address the semantic gap or mapping problem between language and image representations through the attentional component. The attention mechanism allows us to see visualizations of which regions in an image are salient and where the model is “looking” when generating each word in the caption.
 
-The following instructions are directed to authors of papers submitted to ACL 2020 or accepted for publication in its proceedings.
-All authors are required to adhere to these specifications.
-Authors are required to provide a Portable Document Format (PDF) version of their papers.
-\textbf{The proceedings are designed for printing on A4 paper.}
+The model implemented in this paper is a combination of proposed methods from two different, but related, research areas—image captioning and machine translation. \citet{Vinyals-2014-showandtell}’s seminal paper \emph{Show and Tell} presents a neural image caption generator (NIC) that uses a vision convolutional neural network (CNN) that encodes images with richer representations to a fixed dimension for the decoder. The encoder’s output is then passed to a language-generating recurrent neural network (RNN)—an LSTM-based sentence generator. Their model demonstrates that this approach significantly improves both accuracy and fluency when generating captions. A neural machine translation with an attention mechanism is proposed in \citet{Bahdanau-2014-neural}. Attention allows the model to look for parts in the source sentence that would be most relevant in predicting the target word. The flexibility of alignment between the source and target sentences introduced through attention allows for better translations, especially between languages that have syntactical differences. 
 
-
-\section{Dataset & Methodology}
-
-ACL provides this description and accompanying style files at
-\begin{quote}
-\url{http://acl2020.org/downloads/acl2020-templates.zip}
-\end{quote}
-We strongly recommend the use of these style files, which have been appropriately tailored for the ACL 2020 proceedings.
-
-\paragraph{\LaTeX-specific details:}
-The templates include the \LaTeX2e{} source (\texttt{\small acl2020.tex}),
-the \LaTeX2e{} style file used to format it (\texttt{\small acl2020.sty}),
-an ACL bibliography style (\texttt{\small acl\_natbib.bst}),
-an example bibliography (\texttt{\small acl2020.bib}),
-and the bibliography for the ACL Anthology (\texttt{\small anthology.bib}).
+The combination of NIC and an attention mechanism resulted in the model implemented by \citet{Xu-2015-show-attend}—a neural image caption generator with visual attention. The encoder uses low-level representations which prioritises salient features of an image. The attention component adds “an extra layer of interpretability to the output of the model” \citep{Xu-2015-show-attend} and the alignments learned by the model correspond very well with human intuition. The motivations and intuitions of choosing to use the model implemented by \citet{Xu-2015-show-attend} for this domain-specific task is discussed in Section 3. 
 
 
-\section{Length of Submission}
+\section{Dataset \& Methodology}
+\subsection{VizWiz Dataset}
+The domain-specific dataset used for this experiment was the VizWiz dataset. It is comprised of 39,181 images taken by people who are either blind or visually impaired. Each image is paired with 5 human-made captions collected through crowdsourcing via Amazon’s Mechanical Turk. 
+
+\section{Results}
 \label{sec:length}
 
 The conference accepts submissions of long papers and short papers.
@@ -106,7 +90,7 @@ Workshop chairs may have different rules for allowed length and whether suppleme
 As always, the respective call for papers is the authoritative source.
 
 
-\section{Anonymity}
+\section{Discussion}
 As reviewing will be double-blind, papers submitted for review should not include any author information (such as names or affiliations). Furthermore, self-references that reveal the author's identity, \emph{e.g.},
 \begin{quote}
 We previously showed \citep{Gusfield:97} \ldots
@@ -128,14 +112,10 @@ For an anonymized submission, ensure that {\small\verb|\aclfinalcopy|} at the to
 For a camera-ready submission, ensure that {\small\verb|\aclfinalcopy|} at the top of this document is not commented out.
 
 
-\section{Multiple Submission Policy}
-Papers that have been or will be submitted to other meetings or publications must indicate this at submission time in the START submission form, and must be withdrawn from the other venues if accepted by ACL 2020. Authors of papers accepted for presentation at ACL 2020 must notify the program chairs by the camera-ready deadline as to whether the paper will be presented. We will not accept for publication or presentation the papers that overlap significantly in content or results with papers that will be (or have been) published elsewhere.
-
-Authors submitting more than one paper to ACL 2020 must ensure that submissions do not overlap significantly (>25\%) with each other in content or results.
+\section{Future Work}
 
 
-
-\section{Formatting Instructions}
+\section{Conclusion}
 
 Manuscripts must be in two-column format.
 Exceptions to the two-column format include the title, authors' names and complete addresses, which must be centered at the top of the first page, and any full-width figures or tables (see the guidelines in Section~\ref{ssec:title-authors}).
