@@ -281,29 +281,19 @@ In terms of attention and seeing what the model is looking at while generating t
 
 \section{Conclusion \& Future Work}
 \label{sec:conc&fw}
+In this paper, a well-renowned and successful model architecture was implemented with a domain-specific task in mind. Using the VizWiz dataset to represent (replicate? WORD) the real-world use of automated image captioning, the model was incredibly unsuccessful in generating captions considered to be useful for the task at hand. Standard captioning with no pre-training other than the domain-specific task dataset gives a very low performance and training must be done outside of the task dataset and then finetuned. The shortcomings of the greedy search algorithm and overlooked limitations of the dataset also contributed to the bad performance of the model. It is extremely crucial to be critical of the data and how it could influence training—both in improvement and detriment. \citet{miltenburg-pragmatic} states “image description literature has generally avoided these issues by delegating them to the crowd-workers annotating the images.” It is important for both the computer vision and natural language processing communities to consider finding ways to further improve already state-of-the-art models for domain-specific tasks as these would have real-world effects on a very large demographic. The architecture can be questioned as being too simple…or not? There are many more mechanisms that must be implemented in order to account for the components that make this specific task very difficult. However, it could also be said that since the images are much more simpler than typical image captioning photographs, the model should be simpler but given more information. 
+
 \subsection{Future Work}
 \label{ssec:futurework}
 
 \subsubsection{Model Architecture}
 \label{sssec:modarch}
-\paragraph{Beam Search}
-\paragraph{Visual Sentinel}
+Alterations to the model architecture would include choosing the beam search algorithm over greedy search since it seems to have caused one of the bigger, more tangible bottlenecks. The beam search algorithm would be more likely to choose the globally optimum solution and deliver more sophisticated and specific captions. The ability to choose the beam size would also allow more flexibility in how far ahead the model should look ahead when making choices at each timestep. Another alteration to consider would be implementing a visual sentinel as \citet{Lu-whentolook} have proposed. This would give the ability to decide whether to rely on the language image or the image through the sentinel gate. This option could give more accurate captions since there will be the chance to prioritise visual information over the word most likely to occur beside the previously chosen word.
 
 \subsubsection{Task-Specific Improvements}
-\label{sssec:ds task}
-\paragraph{Rule-based Template}
-\paragraph{Optical Character Recognition}
-
-
-
-\section*{Acknowledgments}
-
-The acknowledgments should go immediately before the references. Do not number the acknowledgments section.
-Do not include this section when submitting your paper for review.
+After examining the data further after already having implemented the model and considering the symbiotic relationship between the dataset and model architecture, some task-specific additions might improve the model’s performance. Since there seemed to be a common-template for what is considered to be an effective caption, implementing some sort of rule-based template for the captions first and foremost might help with creating a more realistic and useful caption for the target demographic. Another important consideration is the vital need to read and summarise text in images. Implementing some form of optical character recognition (OCR) and text summarisation would be extremely helpful. A mechanism where if text is detected, it will be used. Additionally, since annotators were instructed to summarise the text rather than repeating what is said, summarising the text output of an OCR mechanism could possibly better mirror the human-made captions in the dataset.
 
 \bibliography{anthology,acl2020}
 \bibliographystyle{acl_natbib}
-
-
 
 \end{document}
