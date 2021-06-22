@@ -28,6 +28,7 @@
 \usepackage{colortbl}
 \usepackage{color}
 \usepackage{booktabs}
+\newcommand{\Secref}[1]{Section~\ref{#1}} 
 
 \aclfinalcopy % Uncomment this line for the final submission
 %\def\aclpaperid{***} %  Enter the acl Paper ID here
@@ -270,15 +271,13 @@ In evaluating the attention in \autoref{fig:stapler}, \autoref{fig:whitetext}, \
 
 \section{Discussion}
 \label{sec:discussion}
-\subsection{Domain-Specific Task}
-\label{ssec:dstask}
+Although \citet{Xu-2015-show-attend} presented a state-of-the-art model that performed incredibly well in generating captions for images, this same model being trained on a domain-specific dataset such as VizWiz was unsuccessful. Captions that are considered to be useful for this task does not only require identifying objects in an image. Additionally, acceptable captions can vary in length, style, and wording. There is a lot of space for a caption to be successful despite the specificity and detail it requires. 
 
-\subsection{Dataset Limitations}
-\label{ssec:datasetlimitations}
+The language patterns learned by the model through the human-made captions also seemed to be not useful at all and could be argued to be detrimental. A post-hoc investigation of the human-made captions was done and many annotators seemed to follow a common template for what is deemed to be succinct and effective—begin with describing the foreground and any item that seems to be the focal point, mention any text that appears, describe the background. This kind of template is not ideal for generating captions for images as the words that will often come up in describing text or the background will always be chosen when used with the greedy search algorithm. Once a word with a very high frequency is chosen, the model will continue to choose the common phrase such as “on a white background”. This tendency will turn into a recursive caption like the example given in \Secref{sec:results}, “a close up of a black background with a white background with a white back-ground”. 
 
-\subsection{Use of Attention}
-\label{ssec:useofattention}
+There are also data limitations when it comes to the images being fed into the model. Since the photographs were taken and submitted by real-word users, people who are visually-impaired, it should be acknowledged that the images are not of the best quality. Images are described to “often contain text, exhibit a high variability in image quality, and contain a large diversity of content”. \citep{Gurari-2020-captioning} In majority of the images, the object in question is not framed properly and we only have a partial view of said object. Focus of the object or clarity is at times also absent in the images. The importance of interpreting and summarising text for this task also creates an obstacle for a typical image caption generator. There are many characteristics of a photograph that we take for granted when implementing models that generate captions. The difference the orientation of an image should also be taken into consideration. In \autoref{fig:stapler}, a model might identify the object as a stapler if the image was on landscape rather than portrait—the “prototypical” position of a stapler. It is crucial to recognise that images and captions (MSCOCO and Flickr8K) being used to train image caption generators are of high-quality and are quite idyllic compared to the images used to train the model for this project. 
 
+In terms of attention and seeing what the model is looking at while generating the captions, it is a good sign that the attention is quite general in the beginning. However, since the captions are not competent and do not refer to anything in the image, it is not possible to ground the text generated with the image and vice versa—creating a bigger semantic gap. With these results, the question of whether attention is even useful or needed for this task is brought up. Attention was initially added into translation models to account for long dependencies and this transfers for images with many objects. Since this task generally requires a caption that describes the focal point or one object, it might be the case that attention is not actually necessary. Another important consideration is the difficulty of replicating human-made caption. As \citet{miltenburg-pragmatic} states, human-generated image descriptions are rich and subjective. There is “virtually [an] infinite set of different ways to describe an image [and] people will use their own knowledge and expectations to choose from all of those options how an image should be described.” \citep{miltenburg-pragmatic} With an infinite amount of options scattered amongst the captions provided, it is incredibly difficult for a model to learn effective patterns to describe an image like a human would.
 
 \section{Conclusion \& Future Work}
 \label{sec:conc&fw}
