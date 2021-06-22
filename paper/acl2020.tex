@@ -25,6 +25,7 @@
 \usepackage{graphicx}
 \graphicspath{ {images/} }
 \raggedbottom
+\usepackage{colortbl}
 
 \aclfinalcopy % Uncomment this line for the final submission
 %\def\aclpaperid{***} %  Enter the acl Paper ID here
@@ -96,11 +97,144 @@ During training, sequences are padded then ordered by length in order to minimis
 
 The greedy search algorithm was implemented for generating captions. In the greedy search algorithm, when given a number of choices in the next stage, the model will always choose the best immediate output. For this task, the language model takes the vocabulary’s logits and turns them into probabilities. This is then fed to the greedy search algorithm where it chooses the highest probable word to occur next at each stage. However, greedy search also has its drawbacks. Since it only chooses the best immediate output and does not look farther ahead, it has a higher chance of not reaching the globally optimum solution—hence its name, \emph{greedy} search.
 
-
-
 \section{Results}
 \label{sec:results}
+ya ya look at  \autoref{trainingdata} that shows
 
+% training stats table
+\begin{table}
+\centering
+\begin{tabular}{|c|c|c|} 
+\hline
+\rowcolor[rgb]{0.761,0.761,0.761} \textbf{Epochs} & \textbf{Top-5 Accuracy} & \textbf{BLEU-4}  \\ 
+\hline
+0                                                 & 55.982                  & 0.1047           \\ 
+\hline
+1                                                 & 59.216                  & 0.1180           \\ 
+\hline
+2                                                 & 60.894                  & 0.1277           \\ 
+\hline
+3                                                 & 62.122                  & 0.1307           \\ 
+\hline
+4                                                 & 62.798                  & 0.1362           \\ 
+\hline
+5                                                 & 63.192                  & 0.1371           \\ 
+\hline
+6                                                 & 63.632                  & 0.1404           \\ 
+\hline
+7                                                 & 63.87                   & 0.1429           \\ 
+\hline
+8                                                 & 64.06                   & 0.1421           \\ 
+\hline
+9                                                 & 64.045                  & 0.1440           \\ 
+\hline
+10                                                & 64.1                    & 0.1447           \\ 
+\hline
+11                                                & 64.112                  & 0.1449           \\ 
+\hline
+12                                                & 64.193                  & 0.1451           \\ 
+\hline
+13                                                & 64.031                  & 0.1445           \\ 
+\hline
+\rowcolor[rgb]{0.992,0.992,0.588} 14              & 63.923                  & 0.1465           \\ 
+\hline
+15                                                & 63.912                  & 0.1461           \\ 
+\hline
+16                                                & 63.808                  & 0.1460           \\ 
+\hline
+17                                                & 63.753                  & 0.1459           \\ 
+\hline
+18                                                & 63.526                  & 0.1456           \\ 
+\hline
+19                                                & 63.594                  & 0.1452           \\ 
+\hline
+20                                                & 63.283                  & 0.1427           \\ 
+\hline
+21                                                & 63.275                  & 0.1429           \\ 
+\hline
+22                                                & 62.96                   & 0.1434           \\ 
+\hline
+23                                                & 63.015                  & 0.1421           \\ 
+\hline
+24                                                & 62.811                  & 0.1422           \\ 
+\hline
+25                                                & 62.629                  & 0.1419           \\ 
+\hline
+26                                                & 62.436                  & 0.1423           \\ 
+\hline
+27                                                & 62.424                  & 0.1416           \\ 
+\hline
+28                                                & 62.383                  & 0.1400           \\ 
+\hline
+29                                                & 62.144                  & 0.1383           \\ 
+\hline
+30                                                & 62.031                  & 0.1403           \\ 
+\hline
+31                                                & 62.002                  & 0.1382           \\ 
+\hline
+32                                                & 61.882                  & 0.1389           \\ 
+\hline
+33                                                & 61.649                  & 0.1370           \\ 
+\hline
+34                                                & 61.53                   & 0.1383           \\
+\hline
+\end{tabular}
+\caption{\label{trainingdata}Top-5 accuracy and BLEU-4 score after each epoch during training. The row highlighted in yellow is the model that performed the best and what was used for validation and testing.}
+\end{table}
+% ------end of table------
+
+and see the loss curve in \autoref{fig:lossgraph}
+
+
+% loss graph figure
+\begin{figure}[h]
+  \includegraphics[width=\linewidth]{paper/images/loss_graph.png}
+  \caption{Loss curve during training. The blue point is the loss for the best performing model.}
+  \label{fig:lossgraph}
+\end{figure}
+% ----end of figure----
+
+
+% examples of captions
+\begin{quote}
+  ``white background''
+\end{quote}
+\begin{quote}
+  ``a close up of a white background with a black background''
+\end{quote}
+\begin{quote}
+  ``a close up of a black background with a white background with a white background''
+\end{quote}
+\begin{quote}
+  ``a close up of a black background with black lettering''
+\end{quote}
+\begin{quote}
+  ``the photo is cropped out of the frame''
+\end{quote}
+
+% attention - black screen
+\begin{figure}[h]
+  \includegraphics[width=\linewidth]{VizWiz_train_00000858.png}
+  \caption{black screen}
+  \label{fig:blackscreen}
+\end{figure}
+% ----end of figure----
+
+% attention - stapler
+\begin{figure}[h]
+  \includegraphics[width=\linewidth]{VizWiz_train_00013366.png}
+  \caption{example}
+  \label{fig:stapler}
+\end{figure}
+% ----end of figure----
+
+% attention - whitetext
+\begin{figure}[h]
+  \includegraphics[width=\linewidth]{VizWiz_train_00023423.png}
+  \caption{page with text}
+  \label{fig:whitetext}
+\end{figure}
+% ----end of figure----
 
 \section{Discussion}
 As reviewing will be double-blind, papers submitted for review should not include any author information (such as names or affiliations). Furthermore, self-references that reveal the author's identity, \emph{e.g.},
