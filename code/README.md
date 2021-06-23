@@ -7,6 +7,7 @@ Use this folder for the code related to your project.
 python create_dataframe.py
 python data_prepare.py
 python train.py
+python test.py
 ```   
 ##### create_dataframe.py  
 - takes JSON files provided by VizWiz and uses pandas to create a dataframe  
@@ -17,8 +18,3 @@ python train.py
 ##### data_prepare.py  
 - creates and prepares input files by splits (training, validation, and test) using vizwiz_annotations.json
 - creates word map and saves as JSON file
-
-##### train.py  
-
-
-##### test.py  
