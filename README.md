@@ -15,7 +15,7 @@ Use this file to keep general notes about your project, including your individua
 - encoder-decoder with attention mechanism
 - pretrained encoder (ResNet)
 - greedy search for generating captions
-- early stopping after 20 epochs of no improvement
+- early stopping after 20 epochs of no improvement in BLEU-4 score
 
 #### Acknowledgments
 - PyTorch Tutorial to Image Captioning by [Sagar Vinodababu](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Image-Captioning#training)
